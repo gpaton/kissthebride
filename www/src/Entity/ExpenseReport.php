@@ -85,7 +85,7 @@ class ExpenseReport
         return $this->company;
     }
 
-    public function setCp�ompany(string $company): static
+    public function setCompany(string $company): static
     {
         $this->company = $company;
 
