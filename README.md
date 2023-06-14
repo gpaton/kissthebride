@@ -13,7 +13,7 @@
 
 1. Docker & Docker-compose sont installés
 2. Le port 80 est disponible
-3. Cloner le repository du test technique : https://github.com/gpaton/ktb
+3. Cloner le repository du test technique : https://github.com/gpaton/kissthebride
 
 ### DOCKER
 
