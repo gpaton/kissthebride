@@ -1,0 +1,37 @@
+FROM php:8.2.7-apache
+
+# Timezones & useful alias
+RUN rm /etc/localtime && ln -snf /usr/share/zoneinfo/Europe/Paris /etc/localtime \
+    && echo "Europe/Paris" > /etc/timezone \
+	&& echo 'alias ll="ls -lah"' >> /root/.bashrc \
+	&& echo 'alias sf="php bin/console"' >> /root/.bashrc \
+	&& . /root/.bashrc
+
+RUN apt-get update && apt install -y \
+    # development packages
+    wget git vim \
+    # intl extension dependency
+    libicu-dev \
+    # zip extension dependency
+    libzip-dev zip
+
+RUN docker-php-ext-install intl mysqli pdo_mysql zip && docker-php-ext-enable opcache
+
+# Symfony CLI
+RUN curl -1sLf 'https://dl.cloudsmith.io/public/symfony/stable/setup.deb.sh' | bash \
+    && apt install -y symfony-cli
+
+# Use PHP development configuration
+RUN mv "$PHP_INI_DIR/php.ini-development" "$PHP_INI_DIR/php.ini"
+
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+RUN rm -f /etc/apache2/sites-available/*.conf
+COPY ./conf/vhost.conf /etc/apache2/sites-available/000-default.conf
+
+
+# Set configurable Apache Document Root in conf other than vhost already configured
+RUN sed -ri -e 's!/var/www/!${APACHE_DOCUMENT_ROOT}!g' /etc/apache2/apache2.conf /etc/apache2/conf-available/*.conf
+
+# Enable mod_rewrite
+RUN a2enmod rewrite
