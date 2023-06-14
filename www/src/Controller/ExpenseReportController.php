@@ -2,10 +2,16 @@
 
 namespace App\Controller;
 
+use App\Entity\User;
 use App\Entity\ExpenseReport;
+use App\Form\ExpenseReportForm;
+use App\Enum\ExpenseReportTypeEnum;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
 class ExpenseReportController extends AbstractController
@@ -33,15 +39,6 @@ class ExpenseReportController extends AbstractController
                 'createdAt' => $expenseReport->getCreatedAt()->format('d/m/Y H:i:s')
             ];
         }
-
-        // As I've not found how to make Serializer context work and time is ticking
-        // I will use classic json_encode instead
-        // Sample with Serializer just below
-        /*$context = (new ObjectNormalizerContextBuilder())
-            ->withGroups('expenseReport')
-            ->toArray();
-        $result = $serializer->serialize(['result' => $expenseReports], 'json', $context);
-        */
         
         return new JsonResponse($result);
     }
@@ -89,5 +86,79 @@ class ExpenseReportController extends AbstractController
         $manager->flush();
 
         return new JsonResponse(['result' => 'OK']);       
+    }
+
+    #[Route('/{userId}/expense-report', name: 'app_expensereport_create',
+        methods: ['POST'],
+        requirements: ['userId' => '\d+']
+    )]
+    #[Route('/{userId}/expense-report/{expenseReportId}', name: 'app_expensereport_update',
+        methods: ['PATCH'],
+        requirements: ['userId' => '\d+', 'expenseReportId' => '\d+']
+    )]
+    public function edit(
+        Request $request,
+        EntityManagerInterface $manager,
+        ValidatorInterface $validator,
+        int $userId,
+        ?int $expenseReportId
+    ): JsonResponse
+    {
+
+        $user = $manager->getRepository(User::class)->find($userId);
+
+        if (!$user) {
+            return new JsonResponse(['result' => 'NOT FOUND'], 404);
+        }
+
+        if (!$expenseReportId) {
+            $expenseReport = new ExpenseReport;
+        } else {
+            $expenseReport = $manager
+                ->getRepository(ExpenseReport::class)
+                ->findOneByUser($userId, $expenseReportId)
+            ;
+            if (!$expenseReport) {
+                return new JsonResponse(['result' => 'NOT FOUND'], 404);
+            }
+        }
+
+        if ($content = json_decode($request->getContent())) {
+            $expenseReportForm = new ExpenseReportForm();
+            $expenseReportForm
+                ->setExpenseDate($content->date)
+                ->setAmount($content->amount)
+                ->setExpenseType($content->type)
+                ->setCompany($content->company)
+            ;
+        } else {
+            return new JsonResponse(['result' => 'INVALID DATA'], 400);
+        }
+
+        
+        $errors = $validator->validate($expenseReportForm);
+        if (count($errors) == 0) {
+            $expenseDate = \DateTime::createFromFormat('Y-m-d', $expenseReportForm->getExpenseDate());
+            $expenseType = ExpenseReportTypeEnum::from($expenseReportForm->getExpenseType());
+
+            $expenseReport
+                ->setExpenseDate($expenseDate)
+                ->setAmount($expenseReportForm->getAmount())
+                ->setExpenseType($expenseType)
+                ->setCompany($expenseReportForm->getCompany())
+                ->setUser($user);
+            ;
+            $manager->persist($expenseReport);
+            $manager->flush();
+    
+            return new JsonResponse(['result' => 'OK']);
+        }
+
+        $result = ['result' => ['errors' => []]];
+        /** @var ConstraintViolation $error */
+        foreach ($errors as $error) {
+            $result['result']['errors'][] = [$error->getPropertyPath() => $error->getMessage()];
+        }
+        return new JsonResponse($result, 400);
     }
 }
