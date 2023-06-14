@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\ExpenseReportTypeEnum;
 use App\Repository\ExpenseReportRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
@@ -20,8 +21,8 @@ class ExpenseReport
     #[ORM\Column(type: Types::DECIMAL, precision: 10, scale: 2)]
     private ?string $amount = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $expenseType = null;
+    #[ORM\Column(length: 255, enumType: ExpenseReportTypeEnum::class)]
+    private ?ExpenseReportTypeEnum $expenseType = null;
 
     #[ORM\Column(length: 255)]
     private ?string $company = null;
@@ -67,12 +68,12 @@ class ExpenseReport
         return $this;
     }
 
-    public function getExpenseType(): ?string
+    public function getExpenseType(): ?ExpenseReportTypeEnum
     {
         return $this->expenseType;
     }
 
-    public function setExpenseType(string $expenseType): static
+    public function setExpenseType(ExpenseReportTypeEnum $expenseType): static
     {
         $this->expenseType = $expenseType;
 
