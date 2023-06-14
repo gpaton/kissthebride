@@ -36,3 +36,16 @@ Ajouter un utilisateur :
     php bin/console doctrine:fixtures:load --group=user --no-interaction
 
 Le projet est prêt à l'emploi et disponible à l'URL [http://localhost](http://localhost)
+
+## TESTS
+
+Pour lancer les tests, commencer par créer la base de données de test :
+
+    php bin/console --env=test doctrine:database:create
+    php bin/console --env=test doctrine:schema:create
+    php bin/console --env=test doctrine:fixtures:load --group=test
+
+Exécuter les tests :
+
+    php bin/phpunit
+

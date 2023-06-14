@@ -3,15 +3,17 @@
 namespace App\DataFixtures;
 
 use App\Entity\User;
+use Doctrine\Persistence\ObjectManager;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Persistence\ObjectManager;
 
-class UserFixtures extends Fixture implements FixtureGroupInterface
+class UserTestFixtures extends Fixture implements FixtureGroupInterface
 {
+    public const USER_REFERENCE = 'user';
+
     public static function getGroups(): array
     {
-        return ['user'];
+        return ['test'];
     }
 
     public function load(ObjectManager $manager): void
@@ -27,5 +29,7 @@ class UserFixtures extends Fixture implements FixtureGroupInterface
         $manager->persist($user);
 
         $manager->flush();
+
+        $this->addReference(self::USER_REFERENCE, $user);
     }
 }
