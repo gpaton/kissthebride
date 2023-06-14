@@ -20,7 +20,19 @@ class ExpenseReportController extends AbstractController
             ->getRepository(ExpenseReport::class)
             ->findAllByuser($userId);
 
-        $result = ['result' => $expenseReports];
+        $result = ['result' => []];
+
+        /** @var ExpenseReport $expenseReport */
+        foreach ($expenseReports as $expenseReport) {
+            $result['result'][] = [
+                'id' => $expenseReport->getId(),
+                'date' => $expenseReport->getExpenseDate()->format('d/m/Y'),
+                'amount' => $expenseReport->getAmount(),
+                'type' => $expenseReport->getExpenseType(),
+                'company' => $expenseReport->getCompany(),
+                'createdAt' => $expenseReport->getCreatedAt()->format('d/m/Y H:i:s')
+            ];
+        }
 
         // As I've not found how to make Serializer context work and time is ticking
         // I will use classic json_encode instead
@@ -44,7 +56,17 @@ class ExpenseReportController extends AbstractController
             ->getRepository(ExpenseReport::class)
             ->findOneByuser($userId, $expenseReportId);
 
-        $result = ['result' => $expenseReport];
+        if (!$expenseReport) {
+            return new JsonResponse(['result' => 'NOT FOUND'], 404);
+        }
+        $result = ['result' => [
+            'id' => $expenseReport->getId(),
+            'date' => $expenseReport->getExpenseDate()->format('d/m/Y'),
+            'amount' => $expenseReport->getAmount(),
+            'type' => $expenseReport->getExpenseType(),
+            'company' => $expenseReport->getCompany(),
+            'createdAt' => $expenseReport->getCreatedAt()->format('d/m/Y H:i:s')
+        ]];
 
         return new JsonResponse($result);
     }

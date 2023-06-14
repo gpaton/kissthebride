@@ -19,7 +19,6 @@ class ExpenseReportRepository extends ServiceEntityRepository
     public function findAllByuser($userId): array
     {
         return $this->createQueryBuilder('e')
-            ->select('e.id, e.expenseDate, e.amount, e.expenseType, e.createdAt, e.company')
             ->andWhere('e.user = :userId')
             ->setParameter('userId', $userId)
             ->orderBy('e.expenseDate', 'DESC')
@@ -31,10 +30,10 @@ class ExpenseReportRepository extends ServiceEntityRepository
     /**
      * @return ExpenseReport Returns an ExpenseReport object
      */
-    public function findOneByuser($userId, $expenseReportId): array
+    public function findOneByuser($userId, $expenseReportId): ?ExpenseReport
     {
         return $this->createQueryBuilder('e')
-            ->select('e.id, e.expenseDate, e.amount, e.expenseType, e.createdAt, e.company')
+            ->select('e')
             ->andWhere('e.user = :userId')
             ->andWhere('e.id = :expenseReportId')
             ->setParameters([
@@ -42,7 +41,7 @@ class ExpenseReportRepository extends ServiceEntityRepository
                 'expenseReportId' => $expenseReportId,
             ])
             ->getQuery()
-            ->getResult()
+            ->getOneOrNullResult()
         ;
     }
 }

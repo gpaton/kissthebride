@@ -30,10 +30,10 @@ class ExpenseReportControllerTest extends WebTestCase
         $this->assertResponseHasHeader('content-type', 'application/json');
 
         // Request a specific page
-        $client->request('GET', '/1/expense-report/2');
+        $client->request('GET', '/1/expense-report/3');
 
-        // Validate a successful response and some content
-        $this->assertResponseIsSuccessful();
+        // Validate a unsuccessful response and some content
+        $this->assertResponseStatusCodeSame(404, '{"result":"NOT FOUND"}');
         $this->assertResponseHasHeader('content-type', 'application/json');
     }
 }
