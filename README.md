@@ -31,8 +31,8 @@ Une fois connecté au service `ktb.server`, créer la structure de la base de do
 
     php bin/console doctrine:migrations:migrate
 
-Installer quelques exemples de données :
+Ajouter un utilisateur :
 
-    php bin/console doctrine:fixtures:load --no-interaction
+    php bin/console doctrine:fixtures:load --group=user --no-interaction
 
 Le projet est prêt à l'emploi et disponible à l'URL [http://localhost](http://localhost)
