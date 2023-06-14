@@ -49,3 +49,15 @@ Exécuter les tests :
 
     php bin/phpunit
 
+## POSTMAN
+
+A la racine du projet, le fichier `postman_collection.json` contient la liste des routes avec des exemples pour utiliser l'API.
+
+## AUTHENTIFICATION
+
+Une méthode simple d'authentification aurait consisté à utiliser le [JSON Login](https://symfony.com/doc/current/security.html#json-login) fourni par Symfony qui permet d'authentifier l'utilisateur via un JSON envoyé en POST.
+L'authentification renverrait ainsi un token identifiant l'utilisateur pour les prochains appels à l'API.
+
+Pour améliorer la sécurité, la mise en place d'appels Stateless à l'API permettrait d'éviter des attaques par rejeu.
+
+La mise en place de l'authentification permettrait aussi d'éviter l'utilisation de l'identifiant utilisateur dans les routes de l'API.
