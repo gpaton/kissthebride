@@ -70,4 +70,24 @@ class ExpenseReportController extends AbstractController
 
         return new JsonResponse($result);
     }
+
+    #[Route('/{userId}/expense-report/{expenseReportId}', name: 'app_expensereport_delete',
+        methods: ['DELETE'],
+        requirements: ['userId' => '\d+', 'expenseReportId' => '\d+']
+    )]
+    public function delete(EntityManagerInterface $manager, int $userId, int $expenseReportId): JsonResponse
+    {
+        $expenseReport = $manager
+            ->getRepository(ExpenseReport::class)
+            ->findOneByuser($userId, $expenseReportId);
+
+        if (!$expenseReport) {
+            return new JsonResponse(['result' => 'NOT FOUND'], 404);
+        }
+
+        $manager->remove($expenseReport);
+        $manager->flush();
+
+        return new JsonResponse(['result' => 'OK']);       
+    }
 }
