@@ -30,8 +30,22 @@ class ExpenseReportController extends AbstractController
             ->toArray();
         $result = $serializer->serialize(['result' => $expenseReports], 'json', $context);
         */
-    
         
+        return new JsonResponse($result);
+    }
+
+    #[Route('/{userId}/expense-report/{expenseReportId}', name: 'app_expensereport',
+        methods: ['GET'],
+        requirements: ['userId' => '\d+', 'expenseReportId' => '\d+']
+    )]
+    public function findOne(EntityManagerInterface $manager, int $userId, int $expenseReportId): JsonResponse
+    {
+        $expenseReport = $manager
+            ->getRepository(ExpenseReport::class)
+            ->findOneByuser($userId, $expenseReportId);
+
+        $result = ['result' => $expenseReport];
+
         return new JsonResponse($result);
     }
 }
