@@ -73,7 +73,7 @@ class ExpenseReportController extends AbstractController
             ->findOneByuser($userId, $expenseReportId);
 
         if (!$expenseReport) {
-            return new JsonResponse(['result' => 'NOT FOUND'], 404);
+            return new JsonResponse(['result' => 'NOT FOUND'], Response::HTTP_NOT_FOUND);
         }
 
         $manager->remove($expenseReport);
@@ -102,7 +102,7 @@ class ExpenseReportController extends AbstractController
         $user = $manager->getRepository(User::class)->find($userId);
 
         if (!$user) {
-            return new JsonResponse(['result' => 'NOT FOUND'], 404);
+            return new JsonResponse(['result' => 'NOT FOUND'], Response::HTTP_NOT_FOUND);
         }
 
         if (!$expenseReportId) {
@@ -113,7 +113,7 @@ class ExpenseReportController extends AbstractController
                 ->findOneByUser($userId, $expenseReportId)
             ;
             if (!$expenseReport) {
-                return new JsonResponse(['result' => 'NOT FOUND'], 404);
+                return new JsonResponse(['result' => 'NOT FOUND'], Response::HTTP_NOT_FOUND);
             }
         }
 
@@ -126,7 +126,7 @@ class ExpenseReportController extends AbstractController
                 ->setCompany($content->company)
             ;
         } else {
-            return new JsonResponse(['result' => 'INVALID DATA'], 400);
+            return new JsonResponse(['result' => 'INVALID DATA'], Response::HTTP_BAD_REQUEST);
         }
 
         
@@ -153,6 +153,6 @@ class ExpenseReportController extends AbstractController
         foreach ($errors as $error) {
             $result['result']['errors'][] = [$error->getPropertyPath() => $error->getMessage()];
         }
-        return new JsonResponse($result, 400);
+        return new JsonResponse($result, Response::HTTP_BAD_REQUEST);
     }
 }
