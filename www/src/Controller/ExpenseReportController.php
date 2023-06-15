@@ -8,9 +8,11 @@ use App\Form\ExpenseReportForm;
 use App\Enum\ExpenseReportTypeEnum;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\Validator\ConstraintViolation;
+use Symfony\Component\Serializer\SerializerInterface;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
@@ -47,25 +49,23 @@ class ExpenseReportController extends AbstractController
         methods: ['GET'],
         requirements: ['userId' => '\d+', 'expenseReportId' => '\d+']
     )]
-    public function findOne(EntityManagerInterface $manager, int $userId, int $expenseReportId): JsonResponse
+    public function findOne(EntityManagerInterface $manager, SerializerInterface $serializer, int $userId, int $expenseReportId): Response
     {
         $expenseReport = $manager
             ->getRepository(ExpenseReport::class)
             ->findOneByuser($userId, $expenseReportId);
 
         if (!$expenseReport) {
-            return new JsonResponse(['result' => 'NOT FOUND'], 404);
+            return new JsonResponse(['result' => 'NOT FOUND'], Response::HTTP_NOT_FOUND);
         }
-        $result = ['result' => [
-            'id' => $expenseReport->getId(),
-            'date' => $expenseReport->getExpenseDate()->format('d/m/Y'),
-            'amount' => $expenseReport->getAmount(),
-            'type' => $expenseReport->getExpenseType(),
-            'company' => $expenseReport->getCompany(),
-            'createdAt' => $expenseReport->getCreatedAt()->format('d/m/Y H:i:s')
-        ]];
 
-        return new JsonResponse($result);
+        $result = $serializer->serialize(['result' => $expenseReport], 'json');
+
+        return new Response(
+            $result,
+            Response::HTTP_OK,
+            ['Content-type' => 'application/json']
+        );
     }
 
     #[Route('/{userId}/expense-report/{expenseReportId}', name: 'app_expensereport_delete',
